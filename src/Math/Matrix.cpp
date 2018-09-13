@@ -87,8 +87,8 @@ namespace Math {
 
 		n.m[0][0] = c;
 		n.m[0][2] = s;
-		n.m[2][0] = s;
-		n.m[2][2] = -c;
+		n.m[2][0] = -s;
+		n.m[2][2] = c;
 		return n;
 	}
 
@@ -99,14 +99,31 @@ namespace Math {
 		float s = Sin(degrees);
 
 		n.m[0][0] = c;
-		n.m[0][1] = s;
-		n.m[1][0] = -s;
+		n.m[0][1] = -s;
+		n.m[1][0] = s;
 		n.m[1][1] = c;
 		return n;
 	}
 
-	Matrix4 Translate(Vector3& translation)
+	Matrix4 Translate(Vector3& translation, float scale)
 	{
-		return Matrix4(1);
+		Matrix4 n(1);
+
+		n.m[0][3] = translation.x * scale;
+		n.m[1][3] = translation.y * scale;
+		n.m[2][3] = translation.z * scale;
+
+		return n;
+	}
+
+	Matrix4 Scale(Vector3& vscale, float scale)
+	{
+		Matrix4 n(1);
+
+		n.m[0][0] = vscale.x * scale;
+		n.m[1][1] = vscale.y * scale;
+		n.m[2][2] = vscale.z * scale;
+
+		return n;
 	}
 };

@@ -4,7 +4,7 @@
 #include "Graphics.hpp"
 #include "Math/Matrix.hpp"
 
-namespace Renderer {
+namespace Render3D {
 	struct Vertex {
 		Math::Vector3 position;
 		Math::Vector3 normal;

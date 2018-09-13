@@ -1,4 +1,4 @@
-#include "Renderer.hpp"
+#include "Render3D.hpp"
 
 extern Graphics::Screen* out;
 extern float* depthBuffer;
@@ -6,7 +6,7 @@ extern float* depthBuffer;
 extern int w, h;
 
 
-namespace Renderer {
+namespace Render3D {
 	void DrawPixel(int x, int y, float r, float g, float b, float l)
 	{
 		Graphics::Pixel np;

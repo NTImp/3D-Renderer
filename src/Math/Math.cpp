@@ -20,4 +20,9 @@ namespace Math {
 	{
 		return tan(RADIANS(degrees));
 	}
+
+	float Sqrt(float val)
+	{
+		return sqrt(val);
+	}
 }

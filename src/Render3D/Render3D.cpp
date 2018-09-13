@@ -1,8 +1,10 @@
-#include "Renderer.hpp"
-#include "Math/Math.hpp"
+#include "Render3D.hpp"
 
 #include <algorithm>
 #include <stdio.h>
+
+#include "Math/Math.hpp"
+#include "Structs.hpp"
 
 Graphics::Screen* out = nullptr;
 float* depthBuffer = nullptr;
@@ -11,13 +13,16 @@ Math::Matrix4 modelMatrix = {};
 Math::Matrix4 viewMatrix = {};
 Math::Matrix4 projMatrix = {};
 Math::Matrix4 pvMatrix = {};
-
+Math::Matrix4 vmMatrix = {};
+Math::Matrix4 pvmMatrix = {};
 //W and H coordinates of the screen for a faster use
 int w = 0, h = 0;
+bool fculling = false;
 
-namespace Renderer {
+namespace Render3D {
 	
-	extern void FromClipToScreen(Triangle& t);
+	extern void FromClipToScreen(ProjOutTriangle& t);
+	extern int ProjectTriangle(Triangle& i, ProjOutTriangle o1[2]);
 
 	void Init(Graphics::Screen* scr)
 	{
@@ -38,6 +43,8 @@ namespace Renderer {
 
 	void SetView(Math::Vector3& position, Math::Vector3& rotation)
 	{
+		viewMatrix = Math::Matrix4(1);
+
 		viewMatrix = Math::RotateX(rotation.x);
 		
 		Math::Matrix4 helper = Math::RotateY(rotation.y);
@@ -47,10 +54,7 @@ namespace Renderer {
 		viewMatrix = Math::mul(viewMatrix, helper);
 
 		//Translation
-		helper = Math::Matrix4(1);
-		helper.m[0][3] = position.x;
-		helper.m[1][3] = position.y;
-		helper.m[2][3] = position.z;
+		helper = Math::Translate(position, -1);
 
 		viewMatrix = Math::mul(viewMatrix, helper);
 		pvMatrix = Math::mul(projMatrix, viewMatrix);
@@ -67,32 +71,19 @@ namespace Renderer {
 		projMatrix = Math::Matrix4(0);
 		projMatrix.m[0][0] = (w / h) * cfov;
 		projMatrix.m[1][1] = cfov;
-		projMatrix.m[2][2] = zscale;
-		projMatrix.m[2][3] = -zscale * zfar;
+		projMatrix.m[2][2] = 1;//zscale;
+		projMatrix.m[2][3] = 1;-zscale * zfar;
 		projMatrix.m[3][2] = 1;
 		
 	}
 
-	inline Math::Vector3 ProjectPoint(Math::Vector3& point)
-	{
-		Math::Matrix4 pvm = Math::mul(projMatrix, viewMatrix);
-		pvm = Math::mul(pvm, modelMatrix);
-		Math::Vector4 ext(point, 1);
-
-		Math::Vector4 pp = Math::mul(pvm, ext);
-
-		return Math::Vector3(pp.x / pp.w, pp.y / pp.w, pp.z);
-	}
-
 	inline void setModelMatrix(Transform& tr)
 	{
+		modelMatrix = Math::Scale(tr.scale, 1);
 		//Translation
-		modelMatrix = Math::Matrix4(1);
-		modelMatrix.m[0][3] = tr.position.x;
-		modelMatrix.m[1][3] = tr.position.y;
-		modelMatrix.m[2][3] = tr.position.z;
+		Math::Matrix4 helper = Math::Translate(tr.position, 1);
+		modelMatrix = Math::mul(modelMatrix, helper);
 
-		Math::Matrix4 helper = Math::RotateX(tr.rotation.x);
 		modelMatrix = Math::mul(modelMatrix, helper);
 		
 		helper = Math::RotateY(tr.rotation.y);
@@ -100,18 +91,25 @@ namespace Renderer {
 		
 		helper = Math::RotateZ(tr.rotation.z);
 		modelMatrix = Math::mul(modelMatrix, helper);
+
+		vmMatrix = Math::mul(viewMatrix, modelMatrix);
+		pvmMatrix = Math::mul(projMatrix, vmMatrix);
 	}
+
+	
 
 	void Draw(std::vector<Triangle>& model, Transform& tr)
 	{
 		setModelMatrix(tr);
 		for (auto& t : model) {
-			Triangle pt(t);//ProjectedTriangle
-
-			pt.t[0].position = ProjectPoint(t.t[0].position);
-			pt.t[1].position = ProjectPoint(t.t[1].position);
-			pt.t[2].position = ProjectPoint(t.t[2].position);
-			FromClipToScreen(pt);
+			ProjOutTriangle triangles[2];
+			int nt = ProjectTriangle(t, triangles);
+			if (nt == 1) {
+				FromClipToScreen(triangles[0]);
+			} else if (nt == 2) {
+				FromClipToScreen(triangles[0]);
+				FromClipToScreen(triangles[1]);
+			}
 		}
 	}
 
