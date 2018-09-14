@@ -107,6 +107,10 @@ namespace Render3D {
 		ot.t[1].position = Math::mul(projMatrix, ot.t[1].position);
 		ot.t[2].position = Math::mul(projMatrix, ot.t[2].position);
 
+		if (	ot.t[0].position.w < 0.1 ||
+			ot.t[1].position.w < 0.1 ||
+			ot.t[2].position.w < 0.1) return 0;
+
 		Math::Vector2 v1;
 		v1.x = ot.t[1].position.x - ot.t[0].position.x, 
 		v1.y = ot.t[1].position.y - ot.t[0].position.y;

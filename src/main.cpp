@@ -4,6 +4,34 @@
 #include "Render3D/Render3D.hpp"
 #include "ModelLoader.hpp"
 
+Math::Vector3 cpos, crot;
+
+void UpdateCamera(float dt)
+{
+	constexpr float uS = 2;
+	constexpr float mS = 2;
+	constexpr float aS = 45;
+	if (Graphics::KeyPressed(SDL_SCANCODE_W))
+	{
+		cpos.x += -Math::Sin(crot.y) * dt * mS;
+		cpos.z += Math::Cos(crot.y) * dt * mS;
+	}
+
+	if (Graphics::KeyPressed(SDL_SCANCODE_S))
+	{
+		cpos.x += Math::Sin(crot.y) * dt * mS;
+		cpos.z += -Math::Cos(crot.y) * dt * mS;
+	}
+
+	if (Graphics::KeyPressed(SDL_SCANCODE_UP)) cpos.y -= dt * uS;
+	if (Graphics::KeyPressed(SDL_SCANCODE_DOWN)) cpos.y += dt * uS;
+
+	if (Graphics::KeyPressed(SDL_SCANCODE_A)) crot.y += dt * aS;
+	if (Graphics::KeyPressed(SDL_SCANCODE_D)) crot.y -= dt * aS;
+	if (crot.y < 0) crot.y = 360;
+	if (crot.y > 360) crot.y = 0;
+}
+
 int main()
 {
 	Graphics::Screen* screen = Graphics::Init(640, 480, 2);
@@ -23,7 +51,6 @@ int main()
 	Graphics::Pixel black;
 	black.r = black.g = black.b = black.a = 0;
 
-	Math::Vector3 cpos, crot;
 	cpos.x = 0;
 	cpos.y = -2;
 	cpos.z = -7;
@@ -40,7 +67,10 @@ int main()
 
 	while (Graphics::isActive()) {
 		float delta = Graphics::GetDelta();
-		mt.rotation.y += delta * 180;
+
+		UpdateCamera(delta);
+		
+		mt.rotation.y += delta * 45;
 		if (mt.rotation.y > 360) mt.rotation.y = 0;
 
 		Render3D::SetView(cpos, crot);
