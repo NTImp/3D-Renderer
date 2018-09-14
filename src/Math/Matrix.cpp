@@ -43,7 +43,7 @@ namespace Math {
 		
 	}
 
-	Matrix4 mul(Matrix4& a, Matrix4& b)
+	Matrix4 mul(Matrix4 a, Matrix4 b)
 	{
 		Matrix4 n;
 		for (int i = 0; i < 4; i++)
@@ -59,7 +59,7 @@ namespace Math {
 		return n;
 	}
 
-	Vector4 mul(Matrix4& a, Vector4& b)
+	Vector4 mul(Matrix4 a, Vector4 b)
 	{
 		Vector4 n;
 		n.x = a.m[0][0] * b.x + a.m[0][1] * b.y + a.m[0][2] * b.z + a.m[0][3] * b.w;
@@ -109,7 +109,7 @@ namespace Math {
 		return n;
 	}
 
-	Matrix4 Translate(Vector3& translation, float scale)
+	Matrix4 Translate(Vector3 translation, float scale)
 	{
 		Matrix4 n(1);
 
@@ -120,7 +120,7 @@ namespace Math {
 		return n;
 	}
 
-	Matrix4 Scale(Vector3& vscale, float scale)
+	Matrix4 Scale(Vector3 vscale, float scale)
 	{
 		Matrix4 n(1);
 

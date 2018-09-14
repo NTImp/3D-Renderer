@@ -26,31 +26,31 @@ namespace Math {
 		float m[4][4];
 	};
 
-	inline float mod(Vector2& a) {
+	inline float mod(Vector2 a) {
 		return Sqrt(a.x*a.x + a.y * a.y);
 	}
 
-	inline float mod(Vector3& a) {
+	inline float mod(Vector3 a) {
 		return Sqrt(a.x*a.x + a.y * a.y + a.z * a.z);
 	}
 
-	inline float mod(Vector4& a) {
+	inline float mod(Vector4 a) {
 		return Sqrt(a.x*a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 	}
 
-	inline float dot(Vector2& a, Vector2& b) {
+	inline float dot(Vector2 a, Vector2 b) {
 		return a.x * b.x + a.y * b.y;
 	};
 
-	inline float cross(Vector2& a, Vector2& b) {
+	inline float cross(Vector2 a, Vector2 b) {
 		return a.x * b.y - a.y * b.x;
 	};
 
-	inline float dot(Vector3& a, Vector3& b) {
+	inline float dot(Vector3 a, Vector3 b) {
 		return a.x * b.x + a.y * b.y + a.z* b.z;
 	};
 
-	inline Vector3 cross(Vector3& a, Vector3& b) {
+	inline Vector3 cross(Vector3 a, Vector3 b) {
 		Vector3 ret;
 		ret.x = a.y * b.z - a.z * b.y;
 		ret.y = a.z * b.x - a.x * b.z;
@@ -59,18 +59,18 @@ namespace Math {
 		return ret;
 	};
 
-	inline float dot(Vector4& a, Vector4& b){
+	inline float dot(Vector4 a, Vector4 b){
 		return a.x * b.x + a.y * b.y + a.z* b.z + a.w * b.w;
 	};
 	
-	Matrix4 mul(Matrix4& a, Matrix4& b);
-	Vector4 mul(Matrix4& a, Vector4& b);
+	Matrix4 mul(Matrix4 a, Matrix4 b);
+	Vector4 mul(Matrix4 a, Vector4 b);
 
 
 	Matrix4 RotateX(float degrees);
 	Matrix4 RotateY(float degrees);
 	Matrix4 RotateZ(float degrees);
-	Matrix4 Translate(Vector3& translation, float scale);
-	Matrix4 Scale(Vector3& vscale, float scale);
+	Matrix4 Translate(Vector3 translation, float scale);
+	Matrix4 Scale(Vector3 vscale, float scale);
 	Matrix4 LookAt(Vector3 f, Vector3 up);
 };

@@ -62,10 +62,7 @@ namespace Render3D {
 		int clipCount = 0;
 		for (int i = 0; i < projCount; i++) {
 			ProjOutTriangle& it = projOut[i];
-			if (	it.t[0].position.w < 0.1 ||
-				it.t[1].position.w < 0.1 ||
-				it.t[2].position.w < 0.1) continue;
-
+			
 			ProjOutTriangle& ot = clipOut[clipCount];
 			ot = it;
 
@@ -77,6 +74,18 @@ namespace Render3D {
 			
 			ot.t[2].position.x /= ot.t[2].position.w;
 			ot.t[2].position.y /= ot.t[2].position.w;
+
+			bool visible = true;
+			for (int e = 0; e < 3 && visible; e++)
+			{
+				if (	ot.t[e].position.z < 0.1 ||
+					ot.t[e].position.x < -1   ||
+					ot.t[e].position.x > 1   ||
+					ot.t[e].position.y < -1   ||
+					ot.t[e].position.y > 1) visible = false;
+			}
+
+			if (!visible) continue;
 
 			//Face culling
 			Math::Vector2 v1;
@@ -99,42 +108,59 @@ namespace Render3D {
 					ot.t[0] = swap;
 				} else continue;
 			} else if (fcull == CullType::back && back) continue;
+
+			ot.t[0].position.x += 1;
+			ot.t[0].position.y += 1;
+
+			ot.t[1].position.x += 1;
+			ot.t[1].position.y += 1;
+
+			ot.t[2].position.x += 1;
+			ot.t[2].position.y += 1;
+
+			ot.t[0].position.x *= 0.5 * w;
+			ot.t[0].position.y *= 0.5 * h;
+
+			ot.t[1].position.x *= 0.5 * w;
+			ot.t[1].position.y *= 0.5 * h;
+
+			ot.t[2].position.x *= 0.5 * w;
+			ot.t[2].position.y *= 0.5 * h;
+
+
 			clipCount++;
 		}
 
-#define ClipToPixel(p, tam) ((int) (((p + 1) * tam / 2)))
-#define PixelToClip(p, tam) (((float) p / tam) * 2 - 1)
-#define Edge(px, py, a, b) ((px - a.x) * (b.y - a.y) - (py - a.y) * (b.x - a.x))
+#define Edge(px, py, a, b) (((float)px - a.x) * (b.y - a.y) - ((float)py - a.y) * (b.x - a.x))
 		for (int i = 0; i < clipCount; i++) {
 			ProjOutTriangle& t = clipOut[i];
-			float minx = 1;
-			float miny = 1;
-			float maxx = -1;
-			float maxy = -1;
+			int minx = w;
+			int miny = h;
+			int maxx = 0;
+			int maxy = 0;
 	
 			//Calculate the minimum rectangle (in clip coordinates) thar contains the triangle
 			for(int i = 0; i < 3; i ++) {
-				minx = std::min(t.t[i].position.x, minx);
-				miny = std::min(t.t[i].position.y, miny);
-				maxx = std::max(t.t[i].position.x, maxx);
-				maxy = std::max(t.t[i].position.y, maxy);
+				minx = std::min((int) t.t[i].position.x, minx);
+				miny = std::min((int) t.t[i].position.y, miny);
+				maxx = std::max((int) t.t[i].position.x, maxx);
+				maxy = std::max((int) t.t[i].position.y, maxy);
 			}
 
 			//The minimum rectange on screen coordinates
-			int sminx = std::max(0, ClipToPixel(minx, w));
-			int smaxx = std::min(w, ClipToPixel(maxx, w) + 1);
+			int sminx = std::max(0, minx);
+			int smaxx = std::min(w, maxx + 1);
 
-			int sminy = std::max(0, ClipToPixel(miny, h)); //Remember that y is inverted in screen space
-			int smaxy = std::min(h, ClipToPixel(maxy, h) + 1); //Remember that y is inverted in screen space
+			int sminy = std::max(0, miny);
+			int smaxy = std::min(h, maxy + 1);
 
+			float y = sminy;
 			for (int i = sminy; i < smaxy; i++) {
+				float x = sminx;
 				for(int e = sminx; e < smaxx; e++) {
-					float clipX = PixelToClip(e, w);
-					float clipY = PixelToClip(i, h);
-
-					float e1 = Edge(clipX, clipY, t.t[1].position, t.t[2].position) / 2;
-					float e2 = Edge(clipX, clipY, t.t[2].position, t.t[0].position) / 2;
-					float e3 = Edge(clipX, clipY, t.t[0].position, t.t[1].position) / 2;
+					float e1 = Edge(x, y, t.t[1].position, t.t[2].position) / 2;
+					float e2 = Edge(x, y, t.t[2].position, t.t[0].position) / 2;
+					float e3 = Edge(x, y, t.t[0].position, t.t[1].position) / 2;
 
 
 					if(e1 > 0 && e2 > 0 && e3 > 0)
@@ -152,7 +178,6 @@ namespace Render3D {
 								e2 * t.t[1].light +
 								e3 * t.t[2].light;
 
-
 						if (depth < depthBuffer[i * w + e])
 						{
 							depthBuffer[i * w + e] = depth;
@@ -165,7 +190,9 @@ namespace Render3D {
 							out->data[i * w + e] = pixel;
 						}
 					}
+					x++;
 				}
+				y++;
 			}
 		}
 	}

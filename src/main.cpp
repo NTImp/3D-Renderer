@@ -4,12 +4,12 @@
 #include "Render3D/Render3D.hpp"
 #include "ModelLoader.hpp"
 
-Math::Vector3 cpos, crot;
+Math::Vector3 cpos, crot, ld;
 
 void UpdateCamera(float dt)
 {
-	constexpr float uS = 4;
-	constexpr float mS = 4;
+	constexpr float uS = 8;
+	constexpr float mS = 8;
 	constexpr float aS = 45;
 	if (Graphics::KeyPressed(SDL_SCANCODE_W))
 	{
@@ -30,16 +30,21 @@ void UpdateCamera(float dt)
 	if (Graphics::KeyPressed(SDL_SCANCODE_D)) crot.y -= dt * aS;
 	if (crot.y < 0) crot.y = 360;
 	if (crot.y > 360) crot.y = 0;
+
+	ld.x = -Math::Sin(crot.y);
+	ld.z = Math::Cos(crot.y);
+	ld.y = 1;
 }
 
 int main()
 {
-	Graphics::Screen* screen = Graphics::Init(640, 480, 2);
+	Graphics::Screen* screen = Graphics::Init(640, 480, 1);
 	Render3D::Init(screen);
 
 	std::vector<Render3D::Triangle> model;
 
 	LoadModel("test_models/spyro.obj", model);
+	//LoadModel("teapot.obj", model);
 	
 	Render3D::Transform mt;
 
@@ -58,21 +63,15 @@ int main()
 	crot.y = 0;
 	crot.z = 0;
 
-	Math::Vector3 ld;
-	ld.x = 1;
-	ld.y = 1;
-	ld.z = 1;
-
-	Render3D::SetLightDirection(ld);
-
 	while (Graphics::isActive()) {
 		float delta = Graphics::GetDelta();
 
 		UpdateCamera(delta);
-		
+
 		//mt.rotation.y += delta * 45;
 		if (mt.rotation.y > 360) mt.rotation.y = 0;
 
+		Render3D::SetLightDirection(ld);
 		Render3D::SetView(cpos, crot);
 	
 		for(int i = 0; i < screen->h; i++)
