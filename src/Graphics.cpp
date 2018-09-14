@@ -1,5 +1,6 @@
 #include "Graphics.hpp"
 
+#include <string.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 
@@ -7,6 +8,7 @@ SDL_Window* window = nullptr;
 SDL_Renderer* render = nullptr;
 SDL_Texture* screen = nullptr;
 
+float delta = 0;
 
 namespace Graphics {
 	Screen scr;
@@ -42,6 +44,15 @@ namespace Graphics {
 
 	bool isActive()
 	{
+		static char title[100];
+		static Uint32 wticks = SDL_GetTicks();
+
+		delta = (float) (SDL_GetTicks() - wticks) / 1000;
+
+		int FPS = 1.f / delta;
+
+		sprintf(title, "3D ENGINE. %d FPS", FPS);
+		SDL_SetWindowTitle(window, title);
 		SDL_Event ev;
 		while(SDL_PollEvent(&ev)) {
 			switch(ev.type) {
@@ -51,6 +62,7 @@ namespace Graphics {
 					break;
 			}
 		}
+		wticks = SDL_GetTicks();
 		return 1;
 	}
 
@@ -58,6 +70,11 @@ namespace Graphics {
 	{
 		static const Uint8* keys = SDL_GetKeyboardState(NULL);
 		return keys[key];
+	}
+
+	float GetDelta()
+	{
+		return delta;
 	}
 
 	void UpdateScreen()

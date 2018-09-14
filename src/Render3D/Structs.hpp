@@ -12,5 +12,6 @@ namespace Render3D {
 		ProjOutTriangle() = default;
 		ProjOutTriangle(Triangle& t);
 		ProjOutVertex t[3];
+		bool back;
 	};
 };

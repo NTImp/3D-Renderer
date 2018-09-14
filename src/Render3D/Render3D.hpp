@@ -21,8 +21,10 @@ namespace Render3D {
 	void Init(Graphics::Screen* scr);
 	void Finish();
 
+	void SetLightDirection(Math::Vector3& light);
 	void SetProjection(float w, float h, float fov);
 	void SetView(Math::Vector3& position, Math::Vector3& rotation);
+	void SetView(Math::Vector3& position, Math::Vector3& forward, Math::Vector3& up);
 
 	void Draw(std::vector<Triangle>& m_model, Transform& tr);
 

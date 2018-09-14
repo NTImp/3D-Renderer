@@ -17,6 +17,7 @@ namespace Graphics {
 
 	bool isActive();
 	bool KeyPressed(int key);
+	float GetDelta();
 
 	void UpdateScreen();
 };

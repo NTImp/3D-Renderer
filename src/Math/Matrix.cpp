@@ -3,6 +3,10 @@
 #include "Math.hpp"
 
 namespace Math {
+	Vector2::Vector2(float _x, float _y) :
+		x(_x), y(_y)
+	{ }
+
 	Vector3::Vector3(float _x, float _y, float _z) :
 		x(_x), y(_y), z(_z)
 	{ }
@@ -124,6 +128,38 @@ namespace Math {
 		n.m[1][1] = vscale.y * scale;
 		n.m[2][2] = vscale.z * scale;
 
+		return n;
+	}
+	
+	Matrix4 LookAt(Vector3 f, Vector3 up)
+	{
+		Matrix4 n(1);
+
+		float mf = mod(f);
+		float mu = mod(up);
+
+		f.x /= mf;
+		f.y /= mf;
+		f.z /= mf;
+
+		up.x /= mu;
+		up.y /= mu;
+		up.z /= mu;
+
+		Vector3 right = cross(f, up);
+
+		n.m[0][0] = right.x;
+		n.m[0][1] = right.y;
+		n.m[0][2] = right.z;
+
+		n.m[1][0] = up.x;
+		n.m[1][1] = up.y;
+		n.m[1][2] = up.z;
+
+		n.m[2][0] = f.x;
+		n.m[2][1] = f.y;
+		n.m[2][2] = f.z;
+		
 		return n;
 	}
 };

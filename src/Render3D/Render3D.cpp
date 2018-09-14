@@ -9,6 +9,8 @@
 Graphics::Screen* out = nullptr;
 float* depthBuffer = nullptr;
 
+Math::Vector4 lightDir = {};
+
 Math::Matrix4 modelMatrix = {};
 Math::Matrix4 viewMatrix = {};
 Math::Matrix4 projMatrix = {};
@@ -17,7 +19,17 @@ Math::Matrix4 vmMatrix = {};
 Math::Matrix4 pvmMatrix = {};
 //W and H coordinates of the screen for a faster use
 int w = 0, h = 0;
-bool fculling = false;
+
+
+enum class CullType {
+	none,
+	back,
+	front
+};
+
+CullType fcull = CullType::none;
+
+
 
 namespace Render3D {
 	
@@ -40,6 +52,13 @@ namespace Render3D {
 		depthBuffer = nullptr;
 	};
 
+	void SetLightDirection(Math::Vector3& light) {
+		lightDir = Math::Vector4(light, 0);
+		float mod = Math::mod(light);
+		lightDir.x /= mod;
+		lightDir.y /= mod;
+		lightDir.z /= mod;
+	}
 
 	void SetView(Math::Vector3& position, Math::Vector3& rotation)
 	{
@@ -57,6 +76,17 @@ namespace Render3D {
 		helper = Math::Translate(position, -1);
 
 		viewMatrix = Math::mul(viewMatrix, helper);
+		pvMatrix = Math::mul(projMatrix, viewMatrix);
+	}
+
+	void SetView(Math::Vector3& position, Math::Vector3& f, Math::Vector3& up)
+	{
+		viewMatrix = Math::Matrix4(1);
+		//viewMatrix = Math::LookAt(f, up);
+		Math::Matrix4 helper = Math::Translate(position, -1);
+
+		viewMatrix = Math::mul(viewMatrix, helper);
+
 		pvMatrix = Math::mul(projMatrix, viewMatrix);
 	}
 
@@ -91,7 +121,7 @@ namespace Render3D {
 		
 		helper = Math::RotateZ(tr.rotation.z);
 		modelMatrix = Math::mul(modelMatrix, helper);
-
+		
 		vmMatrix = Math::mul(viewMatrix, modelMatrix);
 		pvmMatrix = Math::mul(projMatrix, vmMatrix);
 	}
@@ -104,11 +134,26 @@ namespace Render3D {
 		for (auto& t : model) {
 			ProjOutTriangle triangles[2];
 			int nt = ProjectTriangle(t, triangles);
-			if (nt == 1) {
-				FromClipToScreen(triangles[0]);
-			} else if (nt == 2) {
-				FromClipToScreen(triangles[0]);
-				FromClipToScreen(triangles[1]);
+
+			for (int i = 0; i < nt; i++) {
+				ProjOutVertex tmp;
+				if (fcull == CullType::none) {
+					if (triangles[i].back) {
+						tmp = triangles[i].t[0];
+						triangles[i].t[0] = triangles[i].t[2];
+						triangles[i].t[2] = tmp;
+					}
+				} else if (fcull == CullType::front) {
+					if (!triangles[i].back) continue;
+
+					tmp = triangles[i].t[0];
+					triangles[i].t[0] = triangles[i].t[2];
+					triangles[i].t[2] = tmp;
+				} else if (fcull == CullType::back) {
+					if (triangles[i].back) continue;
+				}
+
+				FromClipToScreen(triangles[i]);
 			}
 		}
 	}

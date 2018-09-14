@@ -1,5 +1,10 @@
 #include "Render3D.hpp"
+
+#include <algorithm>
+
 #include "Structs.hpp"
+
+extern Math::Vector4 lightDir;
 
 extern Math::Matrix4 modelMatrix;
 extern Math::Matrix4 viewMatrix;
@@ -78,32 +83,39 @@ namespace Render3D {
 	}
 	*/
 
-	/*
-	inline ProjOutVertex ProjectVertex(ProjOutVertex i)
-	{
-		i.position = Math::mul(projMatrix, i.position);
-
-		i.position.x /= i.position.w;
-		i.position.y /= i.position.w;
-
-		return i;
-	}
-	*/
-
 	int ProjectTriangle(Triangle& i, ProjOutTriangle o[2])
 	{
 		ProjOutTriangle ot(i);
+
+		Math::Vector4 extN(i.t[0].normal, 0);
+		extN = Math::mul(modelMatrix, extN);
+		ot.t[0].light = std::max(0.2f, Math::dot(extN, lightDir));
+
+		extN = Math::Vector4(i.t[1].normal, 0);
+		extN = Math::mul(modelMatrix, extN);
+		ot.t[1].light = std::max(0.2f, Math::dot(extN, lightDir));
+
+		extN = Math::Vector4(i.t[2].normal, 0);
+		extN = Math::mul(modelMatrix, extN);
+		ot.t[2].light = std::max(0.2f, Math::dot(extN, lightDir));
+
 		ot.t[0].position = Math::mul(vmMatrix, ot.t[0].position);
 		ot.t[1].position = Math::mul(vmMatrix, ot.t[1].position);
 		ot.t[2].position = Math::mul(vmMatrix, ot.t[2].position);
 
-		ot.t[0].light = 1;
-		ot.t[1].light = 1;
-		ot.t[2].light = 1;
-
 		ot.t[0].position = Math::mul(projMatrix, ot.t[0].position);
 		ot.t[1].position = Math::mul(projMatrix, ot.t[1].position);
 		ot.t[2].position = Math::mul(projMatrix, ot.t[2].position);
+
+		Math::Vector2 v1;
+		v1.x = ot.t[1].position.x - ot.t[0].position.x, 
+		v1.y = ot.t[1].position.y - ot.t[0].position.y;
+
+		Math::Vector2 v2;
+		v2.x = ot.t[2].position.x - ot.t[0].position.x, 
+		v2.y = ot.t[2].position.y - ot.t[0].position.y;
+
+		ot.back = Math::cross(v1, v2) > 0;
 
 		ot.t[0].position.x /= ot.t[0].position.w;
 		ot.t[0].position.y /= ot.t[0].position.w;

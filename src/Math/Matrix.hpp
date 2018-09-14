@@ -72,4 +72,5 @@ namespace Math {
 	Matrix4 RotateZ(float degrees);
 	Matrix4 Translate(Vector3& translation, float scale);
 	Matrix4 Scale(Vector3& vscale, float scale);
+	Matrix4 LookAt(Vector3 f, Vector3 up);
 };
