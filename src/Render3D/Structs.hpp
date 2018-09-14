@@ -3,6 +3,13 @@
 #include "Render3D.hpp"
 
 namespace Render3D {
+	enum class CullType {
+		none,
+		back,
+		front
+	};
+
+
 	struct ProjOutVertex {
 		Math::Vector4 position;
 		float light;
@@ -12,6 +19,7 @@ namespace Render3D {
 		ProjOutTriangle() = default;
 		ProjOutTriangle(Triangle& t);
 		ProjOutVertex t[3];
-		bool back;
 	};
+
+	constexpr int maxTriangles = 50 * 1024 * 1024 / sizeof(ProjOutTriangle);
 };

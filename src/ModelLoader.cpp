@@ -39,9 +39,9 @@ void LoadModel(const char* file, std::vector<Render3D::Triangle>& model)
 
 				Math::Vector3 normal = Math::cross(d2, d1);
 
-				t.t[0] = vertices[i + 0];
-				t.t[1] = vertices[i + 1];
-				t.t[2] = vertices[i + 2];
+				t.t[0] = vertices[m.Indices[i + 0]];
+				t.t[1] = vertices[m.Indices[i + 1]];
+				t.t[2] = vertices[m.Indices[i + 2]];
 
 				t.t[0].normal = normal;
 				t.t[1].normal = normal;

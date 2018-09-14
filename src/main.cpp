@@ -8,8 +8,8 @@ Math::Vector3 cpos, crot;
 
 void UpdateCamera(float dt)
 {
-	constexpr float uS = 2;
-	constexpr float mS = 2;
+	constexpr float uS = 4;
+	constexpr float mS = 4;
 	constexpr float aS = 45;
 	if (Graphics::KeyPressed(SDL_SCANCODE_W))
 	{
@@ -39,7 +39,7 @@ int main()
 
 	std::vector<Render3D::Triangle> model;
 
-	LoadModel("teapot.obj", model);
+	LoadModel("test_models/spyro.obj", model);
 	
 	Render3D::Transform mt;
 
@@ -70,7 +70,7 @@ int main()
 
 		UpdateCamera(delta);
 		
-		mt.rotation.y += delta * 45;
+		//mt.rotation.y += delta * 45;
 		if (mt.rotation.y > 360) mt.rotation.y = 0;
 
 		Render3D::SetView(cpos, crot);

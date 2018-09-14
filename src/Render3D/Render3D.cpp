@@ -20,21 +20,10 @@ Math::Matrix4 pvmMatrix = {};
 //W and H coordinates of the screen for a faster use
 int w = 0, h = 0;
 
-
-enum class CullType {
-	none,
-	back,
-	front
-};
-
-CullType fcull = CullType::none;
-
-
-
 namespace Render3D {
+	CullType fcull = CullType::front;
 	
-	extern void FromClipToScreen(ProjOutTriangle& t);
-	extern int ProjectTriangle(Triangle& i, ProjOutTriangle o1[2]);
+	extern void RenderTriangles(std::vector<Triangle>& triangles);
 
 	void Init(Graphics::Screen* scr)
 	{
@@ -131,31 +120,7 @@ namespace Render3D {
 	void Draw(std::vector<Triangle>& model, Transform& tr)
 	{
 		setModelMatrix(tr);
-		for (auto& t : model) {
-			ProjOutTriangle triangles[2];
-			int nt = ProjectTriangle(t, triangles);
-
-			for (int i = 0; i < nt; i++) {
-				ProjOutVertex tmp;
-				if (fcull == CullType::none) {
-					if (triangles[i].back) {
-						tmp = triangles[i].t[0];
-						triangles[i].t[0] = triangles[i].t[2];
-						triangles[i].t[2] = tmp;
-					}
-				} else if (fcull == CullType::front) {
-					if (!triangles[i].back) continue;
-
-					tmp = triangles[i].t[0];
-					triangles[i].t[0] = triangles[i].t[2];
-					triangles[i].t[2] = tmp;
-				} else if (fcull == CullType::back) {
-					if (triangles[i].back) continue;
-				}
-
-				FromClipToScreen(triangles[i]);
-			}
-		}
+		RenderTriangles(model);
 	}
 
 	void clearDepthBuffer()

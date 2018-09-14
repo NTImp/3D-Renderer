@@ -28,15 +28,15 @@ namespace Graphics {
 		render = SDL_CreateRenderer(window, 0, 0);
 
 		screen = SDL_CreateTexture(render, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, screen_w, screen_h);
-		printf("Locking\n");
 		SDL_LockTexture(screen, NULL, (void**) &scr.data, &scr.p);
-		printf("Locked\n");
 
+		//scr.data = new Pixel[scr.w * scr.h];
 		return &scr;
 	}
 
 	void Quit()
 	{
+		//delete src.data;
 		SDL_DestroyTexture(screen);
 		SDL_DestroyWindow(window);
 		SDL_Quit();
@@ -83,5 +83,16 @@ namespace Graphics {
 		SDL_RenderCopy(render, screen, NULL, NULL);
 		SDL_RenderPresent(render);
 		SDL_LockTexture(screen, NULL, (void**) &scr.data, &scr.p);
+
+		/*
+		for (int y = 0; y < scr.h; y++) {
+			for (int x = 0; x < scr.w; x++) {
+				Pixel p = scr.data[y * scr.w + x];
+				SDL_SetRenderDrawColor(render, p.r, p.g, p.b, 255);
+				SDL_RenderDrawPoint(render, x, y);
+			}
+		}
+		SDL_RenderPresent(render);
+		*/
 	}
 }
