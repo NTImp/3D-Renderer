@@ -21,7 +21,7 @@ Math::Matrix4 pvmMatrix = {};
 int w = 0, h = 0;
 
 namespace Render3D {
-	CullType fcull = CullType::none;
+	CullType fcull = CullType::back;
 	
 	extern void RenderTriangles(std::vector<Triangle>& triangles);
 
@@ -89,7 +89,7 @@ namespace Render3D {
 
 		projMatrix = Math::Matrix4(0);
 		projMatrix.m[0][0] = (h / w) * cfov;
-		projMatrix.m[1][1] = cfov;
+		projMatrix.m[1][1] = -cfov; //Invert y
 		projMatrix.m[2][2] = 1;//zscale;
 		projMatrix.m[2][3] = 1;-zscale * zfar;
 		projMatrix.m[3][2] = 1;

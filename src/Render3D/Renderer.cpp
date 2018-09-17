@@ -117,7 +117,7 @@ namespace Render3D {
 			Math::Vector2 v2;
 			v2.x = ot.t[2].position.x - ot.t[0].position.x, 
 			v2.y = ot.t[2].position.y - ot.t[0].position.y;
-			bool back = Math::cross(v1, v2) > 0;
+			bool back = Math::cross(v2, v1) > 0;
 			ProjOutVertex swap;
 			if (fcull == CullType::none && back) {
 				swap = ot.t[2];
@@ -213,7 +213,12 @@ namespace Render3D {
 				int e20 = e20_r;
 
 				for(int e = sminx; e < smaxx; e++) {
-					if(e01 >= 0 && e20 >= 0 && e12 >= 0) {
+					/*
+					e01 = Edge(e, i, t.t[0].position, t.t[1].position);
+					e12 = Edge(e, i, t.t[1].position, t.t[2].position);
+					e20 = Edge(e, i, t.t[2].position, t.t[0].position);
+					*/
+					if(e01 <= 0 && e20 <= 0 && e12 <= 0) {
 						float area = (float) (e01 + e20 + e12) / 2;
 
 						float depth = 	((float) e12 / area) * t.t[0].position.w +
@@ -233,13 +238,13 @@ namespace Render3D {
 							out->data[i * w + e] = pixel;
 						}
 					}
-					e01 -= a01;
-					e20 -= a20;
-					e12 -= a12;
+					e01 += -a01;
+					e20 += -a20;
+					e12 += -a12;
 				}
-				e01_r -= b01;
-				e20_r -= b20;
-				e12_r -= b12;
+				e01_r += -b01;
+				e20_r += -b20;
+				e12_r += -b12;
 			}
 		}
 	}

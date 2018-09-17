@@ -43,21 +43,21 @@ int main()
 
 	std::vector<Render3D::Triangle> model;
 
-	LoadModel("test_models/spyro.obj", model);
+	LoadModel("teapot.obj", model);
 	//LoadModel("teapot.obj", model);
 	
 	Render3D::Transform mt;
 
 	mt.position = Math::Vector3(0, 0, 0);
 	mt.rotation = Math::Vector3(0, 0, 0);
-	mt.scale = Math::Vector3(1, -1, 1);
+	mt.scale = Math::Vector3(1, 1, 1);
 	Render3D::SetProjection(screen->w, screen->h, 90);
 
 	Graphics::Pixel black;
 	black.r = black.g = black.b = black.a = 0;
 
 	cpos.x = 0;
-	cpos.y = -2;
+	cpos.y = 2;
 	cpos.z = -7;
 	crot.x = 0;
 	crot.y = 0;
