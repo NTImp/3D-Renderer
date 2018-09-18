@@ -14,7 +14,7 @@ extern Math::Matrix4 vmMatrix;
 extern Math::Matrix4 pvmMatrix;
 
 //Clip plane
-constexpr float cz = 0.1f;
+constexpr float cz = 0.00001f;
 
 //W and H coordinates of the screen for a faster use
 extern int w, h;
@@ -26,13 +26,24 @@ namespace Render3D {
 
 	ProjOutTriangle projOut[maxTriangles];
 	ProjOutTriangle clipOut[maxTriangles * 2];
+	constexpr float cz = 0.1f;
+
+	inline ProjOutVertex Intersection(ProjOutVertex& va, ProjOutVertex& vb)
+	{
+		ProjOutVertex ret = va;
+		float u = (cz - vb.position.w) / (vb.position.w - va.position.w);
+		ret.position =  Math::Vector4(	u * (vb.position.x - va.position.x) + vb.position.x,
+						u * (vb.position.y - va.position.y) + vb.position.y,
+						u * (vb.position.z - va.position.z) + vb.position.z,
+						cz);
+		return ret;
+	}
 
 	void RenderTriangles(std::vector<Triangle>& triangles)
 	{
 		int projCount = 0;
 		for (auto& t : triangles) {
-			ProjOutTriangle& ot = projOut[projCount++];
-			ot = ProjOutTriangle(t);
+			ProjOutTriangle ot = ProjOutTriangle(t);
 
 
 			//Calculates light
@@ -56,6 +67,38 @@ namespace Render3D {
 			ot.t[0].position = Math::mul(projMatrix, ot.t[0].position);
 			ot.t[1].position = Math::mul(projMatrix, ot.t[1].position);
 			ot.t[2].position = Math::mul(projMatrix, ot.t[2].position);
+			
+			ProjOutVertex* vout[3] = {0};
+			ProjOutVertex* vin[3] = {0};
+			int voutc = 0, vinc = 0;
+
+			ProjOutTriangle i0, i1;
+			for (int i = 0; i < 3; i++) {
+				if (ot.t[i].position.w < cz)  vout[voutc++] = &ot.t[i];
+				else  vin[vinc++] = &ot.t[i];
+			}
+			
+			if (voutc == 0) projOut[projCount++] = ot;
+			else if (voutc == 1) {
+				ProjOutVertex cv0 = Intersection(*vin[1], *vout[0]);
+				ProjOutVertex cv1 = Intersection(*vout[0], *vin[0]);
+
+				i0.t[0] = *vin[0];
+				i0.t[1] = cv0;
+				i0.t[2] = cv1;
+
+				i1.t[0] = *vin[0];
+				i1.t[1] = *vin[1];
+				i1.t[2] = cv0;
+
+				projOut[projCount++] = i0;
+				projOut[projCount++] = i1;
+			} else if (voutc == 2) {
+				i0.t[0] = *vin[0];
+				i0.t[1] = Intersection(*vin[0], *vout[0]);
+				i0.t[2] = Intersection(*vout[1], *vin[0]);
+				projOut[projCount++] = i0;
+			}
 		}
 
 		//CullFace Clipping
@@ -66,10 +109,13 @@ namespace Render3D {
 			ProjOutTriangle& ot = clipOut[clipCount];
 			ot = it;
 
+			/*
 			if (	ot.t[0].position.w < 0.1 ||
 				ot.t[1].position.w < 0.1 ||
 				ot.t[2].position.w < 0.1) continue;
+			*/
 
+			
 			ot.t[0].position.x /= ot.t[0].position.w;
 			ot.t[0].position.y /= ot.t[0].position.w;
 			
@@ -95,19 +141,19 @@ namespace Render3D {
 
 			if (	ot.t[0].position.x < -1 &&
 				ot.t[1].position.x < -1 &&
-				ot.t[1].position.x < -1) continue;
+				ot.t[2].position.x < -1) continue;
 
 			if (	ot.t[0].position.x > 1 &&
 				ot.t[1].position.x > 1 &&
-				ot.t[1].position.x > 1) continue;
+				ot.t[2].position.x > 1) continue;
 
 			if (	ot.t[0].position.y < -1 &&
 				ot.t[1].position.y < -1 &&
-				ot.t[1].position.y < -1) continue;
+				ot.t[2].position.y < -1) continue;
 
 			if (	ot.t[0].position.y > 1 &&
 				ot.t[1].position.y > 1 &&
-				ot.t[1].position.y > 1) continue;
+				ot.t[2].position.y > 1) continue;
 
 			//Face culling
 			Math::Vector2 v1;

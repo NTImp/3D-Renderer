@@ -23,8 +23,8 @@ void UpdateCamera(float dt)
 		cpos.z += -Math::Cos(crot.y) * dt * mS;
 	}
 
-	if (Graphics::KeyPressed(SDL_SCANCODE_UP)) cpos.y -= dt * uS;
-	if (Graphics::KeyPressed(SDL_SCANCODE_DOWN)) cpos.y += dt * uS;
+	if (Graphics::KeyPressed(SDL_SCANCODE_UP)) cpos.y += dt * uS;
+	if (Graphics::KeyPressed(SDL_SCANCODE_DOWN)) cpos.y -= dt * uS;
 
 	if (Graphics::KeyPressed(SDL_SCANCODE_A)) crot.y += dt * aS;
 	if (Graphics::KeyPressed(SDL_SCANCODE_D)) crot.y -= dt * aS;
@@ -33,7 +33,7 @@ void UpdateCamera(float dt)
 
 	ld.x = -Math::Sin(crot.y);
 	ld.z = Math::Cos(crot.y);
-	ld.y = 1;
+	ld.y = -1;
 }
 
 int main()
@@ -43,8 +43,8 @@ int main()
 
 	std::vector<Render3D::Triangle> model;
 
-	LoadModel("teapot.obj", model);
 	//LoadModel("teapot.obj", model);
+	LoadModel("test_models/spyro.obj", model);
 	
 	Render3D::Transform mt;
 
