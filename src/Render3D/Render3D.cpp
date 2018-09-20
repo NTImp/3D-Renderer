@@ -21,7 +21,7 @@ Math::Matrix4 pvmMatrix = {};
 int w = 0, h = 0;
 
 namespace Render3D {
-	CullType fcull = CullType::back;
+	CullType fcull = CullType::none;
 	
 	extern void RenderTriangles(std::vector<Triangle>& triangles);
 

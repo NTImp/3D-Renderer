@@ -8,6 +8,7 @@ namespace Render3D {
 	struct Vertex {
 		Math::Vector3 position;
 		Math::Vector3 normal;
+		Math::Vector2 texture;
 	};
 
 	struct Triangle {

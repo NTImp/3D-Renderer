@@ -13,6 +13,7 @@ namespace Render3D {
 	struct ProjOutVertex {
 		Math::Vector4 position;
 		float light;
+		Math::Vector2 texture;
 	};
 
 	struct ProjOutTriangle {

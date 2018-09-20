@@ -253,6 +253,12 @@ namespace Render3D {
 			int e12_r = Edge(sminx, sminy, t.t[1].position, t.t[2].position);
 			int e20_r = Edge(sminx, sminy, t.t[2].position, t.t[0].position);
 
+
+			//Inversed z for perspective correction
+			float iz[3];
+			iz[0] = 1.f / t.t[0].position.w;
+			iz[1] = 1.f / t.t[1].position.w;
+			iz[2] = 1.f / t.t[2].position.w;
 			for (int i = sminy; i < smaxy; i++) {
 				int e01 = e01_r;
 				int e12 = e12_r;
@@ -267,9 +273,10 @@ namespace Render3D {
 					if(e01 <= 0 && e20 <= 0 && e12 <= 0) {
 						float area = (float) (e01 + e20 + e12) / 2;
 
-						float depth = 	((float) e12 / area) * t.t[0].position.w +
-								((float) e20 / area) * t.t[1].position.w +
-								((float) e01 / area) * t.t[2].position.w;
+						float depth = 	1.f / (
+								((float) e12 / area) * iz[0] +
+								((float) e20 / area) * iz[1] +
+								((float) e01 / area) * iz[2]);
 
 						float light = t.t[0].light;
 						if (depth < depthBuffer[i * w + e])
