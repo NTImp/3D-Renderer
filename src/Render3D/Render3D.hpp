@@ -27,7 +27,7 @@ namespace Render3D {
 	void SetView(Math::Vector3& position, Math::Vector3& rotation);
 	void SetView(Math::Vector3& position, Math::Vector3& forward, Math::Vector3& up);
 
-	void Draw(std::vector<Triangle>& m_model, Transform& tr);
+	void Draw(std::vector<Triangle>& m_model, Transform& tr, Graphics::Image* img);
 
 	void clearDepthBuffer();
 };

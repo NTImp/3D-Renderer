@@ -23,6 +23,7 @@ extern Graphics::Screen* out;
 
 namespace Render3D {
 	extern CullType fcull;
+	extern Graphics::Image* texture;
 
 	ProjOutTriangle projOut[maxTriangles];
 	ProjOutTriangle clipOut[maxTriangles * 2];
@@ -36,6 +37,8 @@ namespace Render3D {
 						u * (vb.position.y - va.position.y) + vb.position.y,
 						u * (vb.position.z - va.position.z) + vb.position.z,
 						cz);
+		ret.texture = Math::Vector2(	u * (vb.texture.x - va.texture.x) + vb.texture.x,
+						u * (vb.texture.y - va.texture.y) + vb.texture.y);
 		return ret;
 	}
 
@@ -259,6 +262,16 @@ namespace Render3D {
 			iz[0] = 1.f / t.t[0].position.w;
 			iz[1] = 1.f / t.t[1].position.w;
 			iz[2] = 1.f / t.t[2].position.w;
+			//Texture coordinates divided by z
+			float ztxt[3][2];
+			ztxt[0][0] = iz[0] * t.t[0].texture.x;
+			ztxt[0][1] = iz[0] * t.t[0].texture.y;
+
+			ztxt[1][0] = iz[1] * t.t[1].texture.x;
+			ztxt[1][1] = iz[1] * t.t[1].texture.y;
+
+			ztxt[2][0] = iz[2] * t.t[2].texture.x;
+			ztxt[2][1] = iz[2] * t.t[2].texture.y;
 			for (int i = sminy; i < smaxy; i++) {
 				int e01 = e01_r;
 				int e12 = e12_r;
@@ -271,21 +284,45 @@ namespace Render3D {
 					e20 = Edge(e, i, t.t[2].position, t.t[0].position);
 					*/
 					if(e01 <= 0 && e20 <= 0 && e12 <= 0) {
-						float area = (float) (e01 + e20 + e12) / 2;
+						int area = (float) (e01 + e20 + e12) / 2;
+						float d12 = (float) e12 / (float) area;
+						float d20 = (float) e20 / (float) area;
+						float d01 = (float) e01 / (float) area;
 
 						float depth = 	1.f / (
-								((float) e12 / area) * iz[0] +
-								((float) e20 / area) * iz[1] +
-								((float) e01 / area) * iz[2]);
+								d12 * iz[0] +
+								d20 * iz[1] +
+								d01 * iz[2]);
+						float u, v;
+						if (texture != nullptr) {
+							u = 	depth *	(ztxt[0][0] * d12 +
+									ztxt[1][0] * d20 +
+									ztxt[2][0] * d01);
+
+							v = 	depth *	(ztxt[0][1] * d12 +
+									ztxt[1][1] * d20 +
+									ztxt[2][1] * d01);
+						}
 
 						float light = t.t[0].light;
 						if (depth < depthBuffer[i * w + e])
 						{
 							depthBuffer[i * w + e] = depth;
 							Graphics::Pixel pixel;
-							pixel.r = light * 255;
-							pixel.g = light * 255;
-							pixel.b = light * 255;
+							if (texture == nullptr) {
+								pixel.r = 255;
+								pixel.g = 255;
+								pixel.b = 255;
+								pixel.a = 1;
+							} else {
+								int cu = u * texture->w;
+								int cv = v * texture->h;
+								pixel = texture->data[cv * texture->w + cu];
+							}
+
+							pixel.r = ((float) pixel.r) * light;
+							pixel.g = ((float) pixel.g) * light;
+							pixel.b = ((float) pixel.b) * light;
 							pixel.a = 1;
 
 							out->data[i * w + e] = pixel;

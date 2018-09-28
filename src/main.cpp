@@ -41,10 +41,12 @@ int main()
 	Graphics::Screen* screen = Graphics::Init(640, 480, 1);
 	Render3D::Init(screen);
 
+	Graphics::Image* txt = Graphics::LoadImage("test_models/txt.jpg");
+
 	std::vector<Render3D::Triangle> model;
 
-	//LoadModel("teapot.obj", model);
-	LoadModel("test_models/spyro.obj", model);
+	LoadModel("teapot.obj", model, false, true);
+	//LoadModel("test_models/spyro.obj", model);
 	
 	Render3D::Transform mt;
 
@@ -78,10 +80,12 @@ int main()
 			for(int e = 0; e < screen->w; e++)
 				screen->data[i * screen->w + e] = black;
 		Render3D::clearDepthBuffer();
-		Render3D::Draw(model, mt);
+		Render3D::Draw(model, mt, txt);
 
 		Graphics::UpdateScreen();
 	};
+
+	Graphics::FreeImage(txt);
 
 	Render3D::Finish();
 	Graphics::Quit();

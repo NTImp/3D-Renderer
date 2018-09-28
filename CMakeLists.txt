@@ -9,5 +9,5 @@ include_directories(src)
 
 file(GLOB_RECURSE src_files "src/*.cpp")
 
-link_libraries(SDL2 SDL2main)
+link_libraries(SDL2 SDL2main SDL2_image)
 add_executable(game ${src_files})

@@ -25,6 +25,8 @@ namespace Render3D {
 	
 	extern void RenderTriangles(std::vector<Triangle>& triangles);
 
+	Graphics::Image* texture = nullptr;
+
 	void Init(Graphics::Screen* scr)
 	{
 		if (depthBuffer) Finish(); //You can recreate the Renderer
@@ -117,8 +119,9 @@ namespace Render3D {
 
 	
 
-	void Draw(std::vector<Triangle>& model, Transform& tr)
+	void Draw(std::vector<Triangle>& model, Transform& tr, Graphics::Image* txt)
 	{
+		texture = txt;
 		setModelMatrix(tr);
 		RenderTriangles(model);
 	}

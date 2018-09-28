@@ -4,11 +4,19 @@
 namespace Graphics {
 #pragma packed(1)
 	struct Pixel {
-		char r, g, b, a;
+		unsigned char r;
+		unsigned char g;
+		unsigned char b;
+		unsigned char a;
 	};
 
 	struct Screen {
 		int w, h, p;
+		Pixel* data;
+	};
+
+	struct Image {
+		int w, h;
 		Pixel* data;
 	};
 
@@ -20,4 +28,7 @@ namespace Graphics {
 	float GetDelta();
 
 	void UpdateScreen();
+
+	Image* LoadImage(const char* src);
+	void FreeImage(Image* img);
 };

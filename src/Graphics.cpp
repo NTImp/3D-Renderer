@@ -3,6 +3,7 @@
 #include <string.h>
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 SDL_Window* window = nullptr;
 SDL_Renderer* render = nullptr;
@@ -24,6 +25,7 @@ namespace Graphics {
 		}
 
 		SDL_Init(SDL_INIT_EVERYTHING);
+		IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 		window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_w * pixelSize, screen_h * pixelSize, SDL_WINDOW_SHOWN);
 		render = SDL_CreateRenderer(window, 0, 0);
 
@@ -39,6 +41,7 @@ namespace Graphics {
 		//delete src.data;
 		SDL_DestroyTexture(screen);
 		SDL_DestroyWindow(window);
+		IMG_Quit();
 		SDL_Quit();
 	}
 
@@ -94,5 +97,38 @@ namespace Graphics {
 		}
 		SDL_RenderPresent(render);
 		*/
+	}
+
+	Image* LoadImage(const char* src)
+	{
+		SDL_Surface* raw = IMG_Load(src);
+		SDL_Surface* conv = SDL_ConvertSurfaceFormat(raw, SDL_PIXELFORMAT_ABGR8888, 0);
+		SDL_FreeSurface(raw);
+
+		Image* img = new Image;
+		img->w = conv->w;
+		img->h = conv->h;
+
+		img->data = new Pixel[img->w * img->h];
+
+		printf("%d, %d\n", img->w, img->h);
+
+		char* dptr = (char*) conv->pixels;
+		for (int i = 0; i < img->h; i++) {
+			char* lptr = dptr + i * conv->pitch;
+			for (int e = 0; e < img->w; e++) {
+				Pixel* pptr = ((Pixel*)lptr) + e;
+				img->data[i * img->w + e] = *pptr;
+			}
+		}
+
+		SDL_FreeSurface(conv);
+		return img;
+	}
+
+	void FreeImage(Image* img)
+	{
+		delete img->data;
+		delete img;
 	}
 }
