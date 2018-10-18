@@ -1,26 +1,35 @@
 #pragma once
 
-#include "Render3D.hpp"
+#include "Math/Matrix.hpp"
 
-namespace Render3D {
-	enum class CullType {
-		none,
-		back,
-		front
-	};
+struct Vertex {
+	Math::Vector3 position;
+	Math::Vector3 normal;
+	Math::Vector2 texture;
+};
 
+struct Triangle {
+	Vertex t[3];
+};
 
-	struct ProjOutVertex {
-		Math::Vector4 position;
-		float light;
-		Math::Vector2 texture;
-	};
+struct Transform {
+	Math::Vector3 position, rotation, scale;
+};
 
-	struct ProjOutTriangle {
-		ProjOutTriangle() = default;
-		ProjOutTriangle(Triangle& t);
-		ProjOutVertex t[3];
-	};
+enum class CullType {
+	none,
+	back,
+	front
+};
 
-	constexpr int maxTriangles = 50 * 1024 * 1024 / sizeof(ProjOutTriangle);
+struct ProjOutVertex {
+	Math::Vector4 position;
+	float light;
+	Math::Vector2 texture;
+};
+
+struct ProjOutTriangle {
+	ProjOutTriangle() = default;
+	ProjOutTriangle(Triangle& t);
+	ProjOutVertex t[3];
 };

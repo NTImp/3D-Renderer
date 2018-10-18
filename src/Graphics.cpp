@@ -5,130 +5,90 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-SDL_Window* window = nullptr;
-SDL_Renderer* render = nullptr;
-SDL_Texture* screen = nullptr;
+Window::Window(int w, int h, int pixelSize)
+{
+	this->w = w;
+	this->h = h;
 
-float delta = 0;
+	SDL_Init(SDL_INIT_EVERYTHING);
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
-namespace Graphics {
-	Screen scr;
+	win = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w * pixelSize, h * pixelSize, SDL_WINDOW_SHOWN);
+	render = SDL_CreateRenderer(win, 0, 0);
+	screen = SDL_CreateTexture(render, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, w, h);
+	scr = new Pixel[w * h];
 
-	Screen* Init(int screen_w, int screen_h, int pixelSize)
-	{
-		scr.w = screen_w;
-		scr.h = screen_h;
-		
-		if (window != nullptr) {
-			std::cout << "CANNOT INIT GRAPHICS TWICE, ABORTING" << std::endl;
-			throw;
+}
+
+Window::~Window()
+{
+	delete scr;
+	//delete src.data;
+	SDL_DestroyTexture(screen);
+	SDL_DestroyWindow(win);
+	IMG_Quit();
+	SDL_Quit();
+}
+
+bool Window::isActive()
+{
+	static char title[100];
+	static Uint32 wticks = SDL_GetTicks();
+
+	delta = (float) (SDL_GetTicks() - wticks) / 1000;
+
+	int FPS = 1.f / delta;
+
+	sprintf(title, "3D ENGINE. %d FPS", FPS);
+	SDL_SetWindowTitle(win, title);
+	SDL_Event ev;
+	while(SDL_PollEvent(&ev)) {
+		switch(ev.type) {
+			case SDL_QUIT:
+				return 0;
+			default:
+				break;
 		}
-
-		SDL_Init(SDL_INIT_EVERYTHING);
-		IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
-		window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_w * pixelSize, screen_h * pixelSize, SDL_WINDOW_SHOWN);
-		render = SDL_CreateRenderer(window, 0, 0);
-
-		screen = SDL_CreateTexture(render, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, screen_w, screen_h);
-		SDL_LockTexture(screen, NULL, (void**) &scr.data, &scr.p);
-
-		//scr.data = new Pixel[scr.w * scr.h];
-		return &scr;
 	}
+	wticks = SDL_GetTicks();
+	return 1;
+}
 
-	void Quit()
-	{
-		//delete src.data;
-		SDL_DestroyTexture(screen);
-		SDL_DestroyWindow(window);
-		IMG_Quit();
-		SDL_Quit();
-	}
+bool Window::keyPressed(int key)
+{
+	static const Uint8* keys = SDL_GetKeyboardState(NULL);
+	return keys[key];
+}
 
-	bool isActive()
-	{
-		static char title[100];
-		static Uint32 wticks = SDL_GetTicks();
+void Window::updateScreen()
+{
+	SDL_UpdateTexture(screen, NULL, (void*) scr, w * sizeof(Pixel));
+	SDL_RenderCopy(render, screen, NULL, NULL);
+	SDL_RenderPresent(render);
+}
 
-		delta = (float) (SDL_GetTicks() - wticks) / 1000;
+Image::Image(const char* src)
+{
+	SDL_Surface* raw = IMG_Load(src);
+	SDL_Surface* conv = SDL_ConvertSurfaceFormat(raw, SDL_PIXELFORMAT_ABGR8888, 0);
+	SDL_FreeSurface(raw);
 
-		int FPS = 1.f / delta;
+	w = conv->w;
+	h = conv->h;
+	data = new Pixel[w * h];
 
-		sprintf(title, "3D ENGINE. %d FPS", FPS);
-		SDL_SetWindowTitle(window, title);
-		SDL_Event ev;
-		while(SDL_PollEvent(&ev)) {
-			switch(ev.type) {
-				case SDL_QUIT:
-					return 0;
-				default:
-					break;
-			}
+	char* dptr = (char*) conv->pixels;
+	for (int i = 0; i < h; i++) {
+		char* lptr = dptr + i * conv->pitch;
+		for (int e = 0; e < w; e++) {
+			Pixel* pptr = ((Pixel*)lptr) + e;
+			data[i * w + e] = *pptr;
 		}
-		wticks = SDL_GetTicks();
-		return 1;
 	}
+	SDL_FreeSurface(conv);
+}
 
-	bool KeyPressed(int key)
-	{
-		static const Uint8* keys = SDL_GetKeyboardState(NULL);
-		return keys[key];
-	}
-
-	float GetDelta()
-	{
-		return delta;
-	}
-
-	void UpdateScreen()
-	{
-		SDL_UnlockTexture(screen);
-		SDL_RenderCopy(render, screen, NULL, NULL);
-		SDL_RenderPresent(render);
-		SDL_LockTexture(screen, NULL, (void**) &scr.data, &scr.p);
-
-		/*
-		for (int y = 0; y < scr.h; y++) {
-			for (int x = 0; x < scr.w; x++) {
-				Pixel p = scr.data[y * scr.w + x];
-				SDL_SetRenderDrawColor(render, p.r, p.g, p.b, 255);
-				SDL_RenderDrawPoint(render, x, y);
-			}
-		}
-		SDL_RenderPresent(render);
-		*/
-	}
-
-	Image* LoadImage(const char* src)
-	{
-		SDL_Surface* raw = IMG_Load(src);
-		SDL_Surface* conv = SDL_ConvertSurfaceFormat(raw, SDL_PIXELFORMAT_ABGR8888, 0);
-		SDL_FreeSurface(raw);
-
-		Image* img = new Image;
-		img->w = conv->w;
-		img->h = conv->h;
-
-		img->data = new Pixel[img->w * img->h];
-
-		printf("%d, %d\n", img->w, img->h);
-
-		char* dptr = (char*) conv->pixels;
-		for (int i = 0; i < img->h; i++) {
-			char* lptr = dptr + i * conv->pitch;
-			for (int e = 0; e < img->w; e++) {
-				Pixel* pptr = ((Pixel*)lptr) + e;
-				img->data[i * img->w + e] = *pptr;
-			}
-		}
-
-		SDL_FreeSurface(conv);
-		return img;
-	}
-
-	void FreeImage(Image* img)
-	{
-		delete img->data;
-		delete img;
-	}
+Image::~Image()
+{
+	delete data;
 }

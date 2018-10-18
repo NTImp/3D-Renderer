@@ -2,7 +2,7 @@
 
 #include "OBJ_Loader.h"
 
-void LoadModel(const char* file, std::vector<Render3D::Triangle>& model, bool auto_normals, bool auto_txt)
+void LoadModel(const char* file, std::vector<Triangle>& model, bool auto_normals, bool auto_txt)
 {
 	model.clear();
 
@@ -11,9 +11,9 @@ void LoadModel(const char* file, std::vector<Render3D::Triangle>& model, bool au
 
 	if (loadout) {
 		for (auto& m : loader.LoadedMeshes) {
-			std::vector<Render3D::Vertex> vertices;
+			std::vector<Vertex> vertices;
 			for (auto& iv : m.Vertices) {
-				Render3D::Vertex ov;
+				Vertex ov;
 				ov.position = Math::Vector3(iv.Position.X, iv.Position.Y, iv.Position.Z);
 				ov.texture = Math::Vector2(iv.TextureCoordinate.X, iv.TextureCoordinate.Y);
 				
@@ -29,7 +29,7 @@ void LoadModel(const char* file, std::vector<Render3D::Triangle>& model, bool au
 			}
 
 			for (int i = 0; i < m.Indices.size(); i += 3) {
-				Render3D::Triangle t;
+				Triangle t;
 
 				t.t[0] = vertices[m.Indices[i + 0]];
 				t.t[1] = vertices[m.Indices[i + 1]];
